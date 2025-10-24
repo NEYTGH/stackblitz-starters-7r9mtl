@@ -1,0 +1,225 @@
+/* =========================
+   Variablen
+   ========================= */
+:root{
+  --fg:#111;
+  --muted:#555;
+  --border:#e5e5e5;
+  --header-h:160px;     /* sichtbare Höhe des Headers im Viewport */
+  --page-pad:16mm;      /* Seiteninnenrand (Print-Seiten) */
+  --wm-opacity:0.08;    /* Wasserzeichen-Transparenz */
+  --wm-size:120mm;      /* Wasserzeichen-Größe */
+}
+
+/* =========================
+   Basis
+   ========================= */
+*{ box-sizing:border-box; }
+html, body { margin:0; padding:0; color:var(--fg); font:14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+
+/* Wasserzeichen (Bildschirm) */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:url("{{ url_for('static', filename='watermark.png') }}");
+  background-repeat:no-repeat;
+  background-position:15% 50%;
+  background-size:var(--wm-size) auto;
+  opacity:var(--wm-opacity);
+  z-index:-1;
+}
+
+/* =========================
+   Header (sichtbar, scrollt mit)
+   ========================= */
+header{
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:#e6f3ff;
+  border-bottom:1px solid #cfe4ff;
+  box-shadow:0 1px 0 rgba(0,0,0,.06);
+  min-height:var(--header-h);
+  padding:24px 16px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+header h1{ margin:0; font-size:26px; }
+header .grow{ flex:1 1 auto; }
+header .controls{ display:flex; gap:10px; align-items:center; }
+
+/* Select (offline, eigener Pfeil) */
+header .controls .select{ position:relative; display:inline-block; }
+header .controls .select select{
+  appearance:none;
+  border:1px solid #bcd6f5;
+  background:linear-gradient(#fff,#f7fbff);
+  border-radius:10px;
+  padding:12px 40px 12px 14px;
+  font-weight:600;
+  cursor:pointer;
+}
+header .controls .select::after{
+  content:"";
+  position:absolute;
+  right:12px; top:50%;
+  transform:translateY(-30%);
+  width:0; height:0;
+  border-left:7px solid transparent;
+  border-right:7px solid transparent;
+  border-top:8px solid #88a9cf;
+  pointer-events:none;
+}
+
+/* Inhalt unter den sticky Header schieben */
+main{ padding: calc(var(--header-h) + 16px) 16px 16px; max-width:1100px; margin:0 auto; }
+
+/* =========================
+   Seiten / Titelseite
+   ========================= */
+.page{ break-after:page; padding:0 var(--page-pad); }
+.page:last-child{ break-after:auto; }
+
+.title-page{
+  position:relative;
+  min-height:260mm;
+  padding:40mm var(--page-pad) 0; /* Platz für Logo-Zeile */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:center;
+}
+.title-page .logo{
+  position:absolute; right:var(--page-pad); top:12mm;
+  width:40mm; height:auto;
+}
+.title-page h1{ font-size:36px; margin:20mm 0 8mm; }
+.subtitle{ font-size:18px; margin:14px 0 6px; }
+.label{ font-weight:600; margin:10px 0 6px; }
+.editable{
+  min-height:28px; padding:8px;
+  border:1px dashed #bdbdbd; border-radius:8px; background:#fafafa;
+  white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word;
+}
+.editable.small{ min-height:24px; padding:6px; }
+.editable.multiline{ min-height:64px; }
+.spacer{ height:12mm; }
+.footer-date{ margin-top:16mm; color:#555; text-align:center; }
+
+/* =========================
+   Grid & Karten
+   ========================= */
+.image-grid{ display:grid; gap:16px; margin-top:8px; }
+.image-grid.grid-1{ grid-template-columns:1fr; }
+.image-grid.grid-2{ grid-template-columns:1fr; }              /* 1 Spalte, 2 Karten pro Seite (Print) */
+.image-grid.grid-6{ grid-template-columns:repeat(2,1fr); }     /* 2x3 pro Seite (Print) */
+
+.card{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+  background:#fff;
+  break-inside:avoid;
+}
+.image-wrap{
+  width:100%; aspect-ratio:4/3; overflow:hidden;
+  border:1px solid #eee; border-radius:6px;
+  background:#f8f8f8; display:flex; align-items:center; justify-content:center;
+}
+.image-wrap img{ max-width:100%; max-height:100%; display:block; object-fit:contain; }
+.filename{ margin-top:8px; font-weight:600; }
+
+/* Infozeile unter Bild: LINKS Metadaten, RECHTS Bemerkung */
+.info{
+  display:flex !important;
+  gap:16px;
+  align-items:flex-start;
+  flex-wrap:nowrap;          /* nicht umbrechen */
+  margin-top:8px;
+}
+.meta-block, .note-block{ flex:1 1 0; min-width:0; }
+.note-label{ font-weight:600; margin-bottom:4px; }
+.note-field.editable{ min-height:48px; }
+
+/* Metadaten-Tabelle schlicht */
+table.meta{ width:100%; border-collapse:collapse; }
+table.meta th, table.meta td{ text-align:left; padding:4px 2px; vertical-align:top; }
+table.meta th{ width:35%; color:#555; font-weight:600; }
+.meta-raw{ white-space:pre-wrap; }
+
+/* Schriftgrößen je Raster */
+.filename, table.meta, .meta-raw, .meta-none, .note-label, .note-field{ font-size:14px; }
+.image-grid.grid-2 .filename,
+.image-grid.grid-2 table.meta, .image-grid.grid-2 .meta-raw, .image-grid.grid-2 .meta-none,
+.image-grid.grid-2 .note-label, .image-grid.grid-2 .note-field{ font-size:12px; }
+.image-grid.grid-6 .filename,
+.image-grid.grid-6 table.meta, .image-grid.grid-6 .meta-raw, .image-grid.grid-6 .meta-none,
+.image-grid.grid-6 .note-label, .image-grid.grid-6 .note-field{ font-size:11px; }
+
+/* =========================
+   PRINT
+   ========================= */
+@media print{
+  @page{ size:A4; margin:12mm; }
+
+  header{ display:none !important; }
+  main{ padding:0; }
+
+  /* Wasserzeichen im Druck: bis in den Rand & weiter links */
+  body::before{
+    position:fixed !important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+    top:-12mm; right:-12mm; bottom:-12mm; left:-12mm; /* @page-Rand ausgleichen */
+    background-position:5mm 50%;  /* weiter links */
+    background-size:var(--wm-size) auto;
+    opacity:var(--wm-opacity);
+  }
+
+  /* Titelseite: mehr Abstand oben; Footer unten */
+  .title-page{ padding-top:40mm !important; justify-content:flex-start !important; }
+  .title-page h1{ margin-top:20mm !important; }
+  .title-page .footer-date{
+    position:absolute; bottom:12mm; left:0; width:100%; text-align:center; font-size:12px;
+  }
+
+  /* Raster-seitige Umbrüche + fixe Kartenhöhe, damit 1/2/6 exakt passen */
+  .image-grid{ gap:12px; }
+  .card{ border:1px solid #ccc; }
+
+  .image-grid.grid-1 .card{ break-after:page; height:auto; }
+
+  .image-grid.grid-2{ grid-template-columns:1fr; }
+  .image-grid.grid-2 .card{ height:128mm; }          /* Platz für Bild+Meta+Bemerkung */
+  .image-grid.grid-2 .card:nth-of-type(2n){ break-after:page; }
+
+  .image-grid.grid-6{ grid-template-columns:repeat(2,1fr); }
+  .image-grid.grid-6 .card{ height:84mm; }
+  .image-grid.grid-6 .card:nth-of-type(6n){ break-after:page; }
+
+  /* Editier-Rahmen im Druck ausblenden */
+  .editable{ border:none; background:transparent; }
+}
+
+Warum „Bemerkung rechts“ jetzt zuverlässig funktioniert
+
+.info ist ein flex-container ohne Wrap (flex-wrap: nowrap;) → der linke .meta-block und der rechte .note-block stehen nebeneinander.
+
+Beide Spalten bekommen flex: 1 1 0 und min-width: 0, damit sie sich gleichmäßig den Platz teilen und nicht aus dem Grid „fallen“.
+
+In der Druckansicht gelten die selben Flex-Regeln; zusätzlich gibt es fixe Kartenhöhen für Raster 2 und 6, damit nichts auf die nächste Seite rutscht.
+
+
+Wenn du willst, dass bei sehr schmalem Browser die Spalten untereinander laufen (nur Bildschirm), kannst du ergänzen:
+
+@media (max-width: 700px){
+  .info{ flex-wrap: wrap; }
+  .meta-block, .note-block{ flex: 1 1 100%; }
+}
+
+Sag Bescheid, wenn ich dir das noch mit reinpacken soll.
